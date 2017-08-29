@@ -70,4 +70,4 @@ bif(x=data; vi=Turing.VarInfo(), sampler=nothing) = begin
     vi
 end
 
-chn = sample(bif, HMC(500, 0.02, 4))
+chn = sample(bif, HMC(1000, 0.02, 4))
