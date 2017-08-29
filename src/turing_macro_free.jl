@@ -28,7 +28,11 @@ function problem_new_parameters(prob::ODEProblem,p)
   ODEProblem(f,u0,tspan)
 end
 
-bif(x=data;vi=Turing.VarInfo(), sampler=nothing) = begin
+# Force Turing.jl to initialize its compiler
+@model bi(x) = begin end
+bi(data)
+
+bif(x=data; vi=Turing.VarInfo(), sampler=nothing) = begin
 
     # Define prior
     a ~ Truncated(Normal(1.5, 1), 0.5, 2.5)  # DE param
