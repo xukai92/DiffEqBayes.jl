@@ -29,14 +29,24 @@ function problem_new_parameters(prob::ODEProblem,p)
 end
 
 # Force Turing.jl to initialize its compiler
-@model bi(x) = begin end
-bi(data)
+# @model bi(x) = begin end
+# bi(data)
+# Above is not required if ~ notation is removed
 
 bif(x=data; vi=Turing.VarInfo(), sampler=nothing) = begin
 
     # Define prior
-    a ~ Truncated(Normal(1.5, 1), 0.5, 2.5)  # DE param
-    σ ~ InverseGamma(2, 3)                   # data noise
+    # a ~ Truncated(Normal(1.5, 1), 0.5, 2.5)  # DE param
+    a = Turing.assume(sampler,
+                      Truncated(Normal(1.5, 1), 0.5, 2.5),
+                      Turing.VarName(vi, [:bif, :a], ""),
+                      vi)
+
+    # σ ~ InverseGamma(2, 3)                   # data noise
+    σ = Turing.assume(sampler,
+                      InverseGamma(2, 3),
+                      Turing.VarName(vi, [:bif, :σ], ""),
+                      vi)
 
     # Update solver
     p_tmp = problem_new_parameters(prob, a); sol_tmp = solve(p_tmp,Tsit5())
@@ -48,7 +58,13 @@ bif(x=data; vi=Turing.VarInfo(), sampler=nothing) = begin
 
     for i = 1:length(t)
         res = sol_tmp(t[i])
-        x[:,i] ~ MvNormal(res, σ*ones(2))
+        # x[:,i] ~ MvNormal(res, σ*ones(2))
+        Turing.observe(
+          sampler,
+          MvNormal(res, σ*ones(2)),   # Distribution
+          x[:,i],    # Data point
+          vi
+        )
     end
 
     vi
