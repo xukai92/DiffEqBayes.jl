@@ -87,7 +87,3 @@ function bayesian_inference(prob::DEProblem,t,data,priors = nothing;alg=:rk45,nu
   return_code, chain_results = stan(stanmodel, [parameter_estimation_data]; CmdStanDir=CMDSTAN_HOME)
   return StanModel(return_code,chain_results)
 end
-
-function bayesian_inference_turing(prob::DEProblem,t,data,priors = nothing;alg=:rk45,num_samples=1000, num_warmup=1000, reltol=1e-3, abstol=1e-6, maxiter=Int(1e5),kwargs...)
-  
-end
